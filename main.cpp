@@ -10,7 +10,8 @@
 
 using namespace std;
 
-bool isActive = true, isCurrentWindow = false;
+bool isActive = true, isCurrentWindow = false, isAFK = false;
+bool isSendingKey = false;
 
 auto activeTime = std::chrono::system_clock::now();
 
@@ -40,8 +41,7 @@ __declspec(dllexport) LRESULT CALLBACK KeyboardEvent(int nCode, WPARAM wParam, L
         SHIFT_key = GetAsyncKeyState(VK_SHIFT);
         CTRL_key = GetAsyncKeyState(VK_CONTROL);
         ALT_key = GetAsyncKeyState(VK_MENU);
-
-        activeTime = std::chrono::system_clock::now();
+        if(!isSendingKey) activeTime = std::chrono::system_clock::now();
 
         // F6
         if (key == 117)
@@ -87,24 +87,26 @@ void SendKey()
 {
     if (hWindowHandle != nullptr)
     {
+        isSendingKey = true;
         INPUT input;
         input.type = INPUT_KEYBOARD;
-        input.ki.wScan = 0x38; // hardware scan code for key
+        input.ki.wScan = 0x0c; // hardware scan code for key
         input.ki.time = 0;
         input.ki.dwExtraInfo = 0;
         input.ki.dwFlags = KEYEVENTF_SCANCODE;
 
         INPUT input0;
-        input.type = INPUT_KEYBOARD;
-        input.ki.wScan = 0xE0; // hardware scan code for key
-        input.ki.time = 0;
-        input.ki.dwExtraInfo = 0;
-        input.ki.dwFlags = KEYEVENTF_SCANCODE; // 0 for key press
+        input0.type = INPUT_KEYBOARD;
+        input0.ki.wScan = 0xE0; // hardware scan code for key
+        input0.ki.time = 0;
+        input0.ki.dwExtraInfo = 0;
+        input0.ki.dwFlags = KEYEVENTF_SCANCODE; // 0 for key press
 
-        INPUT inputs[2] = {input0, input};
-        SendInput(2, inputs, sizeof(INPUT));
+        //INPUT inputs[2] = {input0, input};
+        SendInput(1, &input, sizeof(INPUT));
 
         cout << "Sent key..." << endl;
+        isSendingKey = false;
     }
 }
 
@@ -148,16 +150,16 @@ int main(int argc, char** argv)
                              (std::chrono::system_clock::now()-activeTime).count();
         if(elapsed_seconds >= 30)
         {
-            isActive = true;
+            isAFK = true;
         }
         else
         {
-            isActive = false;
+            isAFK = false;
         }
 
-        auto str = isActive ? (!isCurrentWindow ? "GAME IS INACTIVE" : "ACTIVE") : "NOT ACTIVE";
+        auto str = isActive ? (!isCurrentWindow ? "GAME IS INACTIVE" : (isAFK ? "ACTIVE" : "USER IS NOT AFK")) : "NOT ACTIVE";
         SetConsoleTitle((str));
-        if(isActive)
+        if(isActive && isAFK)
         {
             if(isCurrentWindow)
             {

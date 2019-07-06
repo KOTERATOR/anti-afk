@@ -1,5 +1,5 @@
 
-
+#include <string>
 #include <iostream>
 #include <Windows.h>
 #include <thread>
@@ -10,7 +10,7 @@
 
 using namespace std;
 
-bool isActive = true, isCurrentWindow = false, isAFK = false;
+bool isActive = true, isCurrentWindow = false, isAFK = false, isAutoForeground = false;
 bool isSendingKey = false;
 
 auto activeTime = std::chrono::system_clock::now();
@@ -50,11 +50,15 @@ __declspec(dllexport) LRESULT CALLBACK KeyboardEvent(int nCode, WPARAM wParam, L
             auto str = isActive ? "ACTIVE" : "NOT ACTIVE";
             cout << str << endl;
             SetConsoleTitle((str));
-            
-            SHIFT_key = 0;
-            CTRL_key = 0;
-            ALT_key = 0;
         }
+        else if (key == 118)
+        {
+            isAutoForeground = !isAutoForeground;
+            cout << "AutoForeground Mode - " << (isAutoForeground ? "ON" : "OFF") << endl; 
+        }
+        SHIFT_key = 0;
+        CTRL_key = 0;
+        ALT_key = 0;
     }
     return CallNextHookEx(hKeyboardHook, nCode, wParam, lParam);
 }
@@ -129,6 +133,7 @@ int main(int argc, char** argv)
 
     cout << "Successfully located " << Target_window_Name << endl;
     cout << "Press F6 to toggle ANTI-AFK" << endl;
+    cout << "Press F7 to toggle AutoForeground Mode. Default - OFF" << endl;
 
     while (true)
     {
@@ -157,15 +162,26 @@ int main(int argc, char** argv)
             isAFK = false;
         }
 
-        auto str = isActive ? (!isCurrentWindow ? "GAME IS INACTIVE" : (isAFK ? "ACTIVE" : "USER IS NOT AFK")) : "NOT ACTIVE";
-        SetConsoleTitle((str));
-        if(isActive && isAFK)
-        {
-            if(isCurrentWindow)
+        string status = isActive ? (!isCurrentWindow ? "GAME IS INACTIVE" : (isAFK ? "ACTIVE" : "USER IS NOT AFK")) : "NOT ACTIVE";
+        status += " || "; status += "AutoForeground Mode - "; status += isAutoForeground ? "ON" : "OFF";
+        SetConsoleTitle((status.c_str()));
+        if(isActive)
+        {-
+            if(isCurrentWindow && isAFK)
             {
                 SendKey();
                 Sleep(10000);
             }
+            else if(isAutoForeground && !isCurrentWindow)
+            {
+                auto currentWindow = GetForegroundWindow();
+                SetForegroundWindow(hWindowHandle);
+                Sleep(100);
+                SendKey();
+                Sleep(100);
+                SetForegroundWindow(currentWindow);
+                Sleep(100000);
+            }      
         }
         
     }

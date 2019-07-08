@@ -108,7 +108,8 @@ void SendKey()
 
         //INPUT inputs[2] = {input0, input};
         SendInput(1, &input, sizeof(INPUT));
-
+        input.ki.dwFlags = KEYEVENTF_SCANCODE | KEYEVENTF_KEYUP;
+        SendInput(1, &input, sizeof(INPUT));
         cout << "Sent key..." << endl;
         isSendingKey = false;
     }
@@ -166,7 +167,7 @@ int main(int argc, char** argv)
         status += " || "; status += "AutoForeground Mode - "; status += isAutoForeground ? "ON" : "OFF";
         SetConsoleTitle((status.c_str()));
         if(isActive)
-        {-
+        {
             if(isCurrentWindow && isAFK)
             {
                 SendKey();

@@ -94,21 +94,15 @@ void SendKey()
         isSendingKey = true;
         INPUT input;
         input.type = INPUT_KEYBOARD;
-        input.ki.wScan = 0x0c; // hardware scan code for key
+        input.ki.wScan = 0x11; // W // 0x0c; // hardware scan code for key
         input.ki.time = 0;
         input.ki.dwExtraInfo = 0;
         input.ki.dwFlags = KEYEVENTF_SCANCODE;
 
-        INPUT input0;
-        input0.type = INPUT_KEYBOARD;
-        input0.ki.wScan = 0xE0; // hardware scan code for key
-        input0.ki.time = 0;
-        input0.ki.dwExtraInfo = 0;
-        input0.ki.dwFlags = KEYEVENTF_SCANCODE; // 0 for key press
-
         //INPUT inputs[2] = {input0, input};
         SendInput(1, &input, sizeof(INPUT));
         input.ki.dwFlags = KEYEVENTF_SCANCODE | KEYEVENTF_KEYUP;
+        //Sleep(10);
         SendInput(1, &input, sizeof(INPUT));
         cout << "Sent key..." << endl;
         isSendingKey = false;

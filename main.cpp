@@ -178,7 +178,7 @@ int main(int argc, char** argv)
                 Sleep(100000);
             }      
         }
-        
+        Sleep(100);
     }
     if (hThread)
         return WaitForSingleObject(hThread, INFINITE);

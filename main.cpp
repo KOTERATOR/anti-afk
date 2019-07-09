@@ -94,7 +94,7 @@ void SendKey()
         isSendingKey = true;
         INPUT input;
         input.type = INPUT_KEYBOARD;
-        input.ki.wScan = 0x11; // W // 0x0c; // hardware scan code for key
+        input.ki.wScan = 0x2d; // X // 0x0c; // hardware scan code for key
         input.ki.time = 0;
         input.ki.dwExtraInfo = 0;
         input.ki.dwFlags = KEYEVENTF_SCANCODE;
